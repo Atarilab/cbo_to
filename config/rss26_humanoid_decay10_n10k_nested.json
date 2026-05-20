@@ -1,0 +1,110 @@
+{
+  "run": {
+    "max_iter": 1000,
+    "max_eval": 32
+  },
+  "task": {
+    "name": "humanoid",
+    "horizon": 2.0,
+    "num_knots": 6,
+    "mjx_integration_time": 0.005,
+    "spline_type": "zero",
+    "params": {
+      "base_weight_target_base_ori_cost": 0.001,
+      "base_weight_k": 0.001,
+      "base_weight_min": 0.1,
+      "base_weight_max": 3.0,
+      "base_weight_update_every": 100,
+      "base_weight_mode": "additive",
+      "base_weight_use_base_pos_cost": true,
+      "base_weight_base_pos_target": 0.01,
+      "base_weight_pre_activation_weight": 1.0,
+      "stand_base_pos_cost_tol": 0.01,
+      "stand_base_ori_cost_tol": 0.01,
+      "stand_min_base_height": null,
+      "terminal_fall_penalty": 0.0,
+      "stand_max_base_lin_vel": null,
+      "stand_max_base_ang_vel": null,
+      "stand_support_margin": 0.0,
+      "stand_joint_limit_violation": null,
+      "terminal_full_config_cost_weight": 0.0,
+      "terminal_cost_weight_mode": "additive",
+      "terminal_cost_k": 0.001,
+      "terminal_cost_update_every": 100,
+      "terminal_cost_min_weight": 0.1,
+      "terminal_cost_max_weight": 3.0,
+      "terminal_cost_base_pos_weight": 1.0,
+      "terminal_cost_base_ori_weight": 1.0,
+      "terminal_cost_foot_pos_weight": 0.0,
+      "terminal_cost_foot_ori_weight": 0.0,
+      "terminal_cost_base_height_weight": 0.0,
+      "terminal_cost_support_weight": 0.0,
+      "terminal_cost_target_base_pos_cost": 0.01,
+      "terminal_cost_target_base_ori_cost": 0.001,
+      "terminal_cost_target_foot_pos_cost": 0.01,
+      "terminal_cost_target_foot_ori_cost": 0.01,
+      "terminal_cost_target_base_height_cost": 0.0,
+      "terminal_cost_use_height_factor": true,
+      "terminal_cost_target_support_cost": 0.0,
+      "use_se3_twist": true,
+      "base_ori_weight_start": 1.0,
+      "base_ori_weight_end": 1.0
+    }
+  },
+  "algorithm_defaults": {
+    "num_samples": 10000,
+    "noise_level": 0.3,
+    "temperature": 1e-16,
+    "persist_particles_every": 500,
+    "persist_particles_latest": 20,
+    "persist_particle_gif_count": 1,
+    "per_particle_consensus_every": 1,
+    "per_particle_consensus_kappa": 1.0,
+    "polar_kernel_reg_loss_weight": 1.0,
+    "polar_auto_weight": false,
+    "cbo": {
+      "decay": 10.0,
+      "dt": 0.001,
+      "temp_decay": 1.001,
+      "limit_temp": 1e-26,
+      "multiply_cost": false,
+      "multiply_knot_weights": false,
+      "anisotropic": true
+    },
+    "cem": {
+      "sigma_min": 0.01
+    }
+  },
+  "algorithms": [
+    {
+      "name": "CBOx"
+    },
+    {
+      "name": "CBOxPolarized"
+    },
+    {
+      "name": "CMA-ES"
+    },
+    {
+      "name": "MPPI"
+    },
+    {
+      "name": "CEM"
+    },
+    {
+      "name": "PS"
+    }
+  ],
+  "logging": {
+    "mean_knots_cost_every": 20,
+    "gc_every": 50,
+    "jax_clear_every": 100,
+    "tracemalloc_every": 200
+  },
+  "load_particles": {
+    "load_particles_from_disk": false,
+    "load_particles_dir": null,
+    "load_particles_algorithm": null,
+    "load_particles_iteration": null
+  }
+}

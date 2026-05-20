@@ -1,0 +1,52 @@
+{
+  "run": {
+    "max_iter": 2000,
+    "max_eval": 32
+  },
+  "task": {
+    "name": "d-cartpole",
+    "horizon": 16.0,
+    "num_knots": 100,
+    "spline_type": "zero"
+  },
+  "algorithm_defaults": {
+    "num_samples": 5000,
+    "noise_level": 0.3,
+    "temperature": 1e-16,
+    "persist_particles_every": 500,
+    "persist_particles_latest": 500,
+    "persist_particle_gif_count": 1,
+    "cbo": {
+      "decay": 10.0,
+      "dt": 0.001,
+      "temp_decay": 1.001,
+      "limit_temp": 1e-26,
+      "multiply_cost": false,
+      "multiply_knot_weights": false,
+      "anisotropic": false
+    }
+  },
+  "algorithms": [
+    {
+      "name": "CBOx"
+    },
+    {
+      "name": "CMA-ES"
+    },
+    {
+      "name": "MPPI_lr"
+    }
+  ],
+  "logging": {
+    "mean_knots_cost_every": 100,
+    "gc_every": 50,
+    "jax_clear_every": 100,
+    "tracemalloc_every": 200
+  },
+  "load_particles": {
+    "load_particles_from_disk": false,
+    "load_particles_dir": null,
+    "load_particles_algorithm": null,
+    "load_particles_iteration": null
+  }
+}

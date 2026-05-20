@@ -1,0 +1,25 @@
+[project]
+name = "swarm-optim"
+version = "0.0.0"
+description = "Trajectory optimization experiments using MuJoCo, JAX, and Hydrax controllers."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "evosax>=0.2.0",
+  "flax>=0.10.0,<0.11",
+  "huggingface_hub>=0.22",
+  "hydrax @ git+https://github.com/vincekurtz/hydrax.git",
+  "imageio>=2.34",
+  "jax[cuda12]>=0.4.35",
+  "matplotlib>=3.8",
+  "mujoco==3.2.4",
+  "numpy>=1.26",
+  "tqdm>=4.66",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
