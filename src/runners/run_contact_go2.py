@@ -148,7 +148,6 @@ def build_observation(
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--policy", default=POLICY_PT_DEFAULT, help="Path to TorchScript policy.")
-    parser.add_argument("--debug-obs", action="store_true", help="Print observation breakdown on first policy step.")
     parser.add_argument("--no-viewer", action="store_true", help="Run headless without launching the viewer.")
     parser.add_argument("--duration", type=float, default=0.0, help="Stop after N seconds (0 = run forever).")
     args = parser.parse_args()
@@ -188,11 +187,10 @@ def main():
 
     step_count = 0
     t_start = time.time()
-    printed_debug = False
 
     def loop_body():
         nonlocal current_contact_plan, current_goal_idx, goal_completion_counter
-        nonlocal command_start, joint_pos_targets_mj, last_action_isaac, step_count, printed_debug
+        nonlocal command_start, joint_pos_targets_mj, last_action_isaac, step_count
 
         loop_t0 = time.time()
         now = loop_t0
@@ -221,21 +219,6 @@ def main():
                 time_left,
                 last_action_isaac,
             )
-            if args.debug_obs and not printed_debug:
-                np.set_printoptions(precision=3, suppress=True)
-                print("[debug] obs (82):", obs)
-                print("[debug] lin_vel_b:", obs[0:3])
-                print("[debug] ang_vel_b:", obs[3:6])
-                print("[debug] projected_gravity:", obs[6:9])
-                print("[debug] contact_locations_b:", obs[9:33].reshape(4, OBS_HORIZON, 3))
-                print("[debug] contact_time_left:", obs[33])
-                print("[debug] contact_plan:", obs[34:42].reshape(2, 4))
-                print("[debug] joint_pos_rel:", obs[42:54])
-                print("[debug] joint_vel:", obs[54:66])
-                print("[debug] ee_pos_rel_b:", obs[66:70])
-                print("[debug] last_action:", obs[70:82])
-                printed_debug = True
-
             with torch.no_grad():
                 raw = policy(torch.from_numpy(obs).to(device).unsqueeze(0))
             raw_isaac = raw.squeeze(0).cpu().numpy().astype(np.float32)
