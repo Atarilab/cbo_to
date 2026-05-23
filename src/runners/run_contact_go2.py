@@ -287,14 +287,23 @@ def main():
             if args.duration > 0 and (time.time() - t_start) >= args.duration:
                 break
     else:
-        with mujoco.viewer.launch_passive(model, data) as viewer:
+        paused = [False]
+
+        def key_callback(keycode):
+            if keycode == ord(" "):
+                paused[0] = not paused[0]
+
+        with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as viewer:
             viewer.cam.type = mujoco.mjtCamera.mjCAMERA_TRACKING
             viewer.cam.trackbodyid = model.body("base_link").id
             viewer.cam.distance = 1.8
             viewer.cam.azimuth = 135.0
             viewer.cam.elevation = -20.0
             while viewer.is_running():
-                loop_body()
+                if paused[0]:
+                    time.sleep(0.01)
+                else:
+                    loop_body()
                 viewer.sync()
                 if args.duration > 0 and (time.time() - t_start) >= args.duration:
                     break
