@@ -260,6 +260,11 @@ def main():
                 break
     else:
         with mujoco.viewer.launch_passive(model, data) as viewer:
+            viewer.cam.type = mujoco.mjtCamera.mjCAMERA_TRACKING
+            viewer.cam.trackbodyid = model.body("base_link").id
+            viewer.cam.distance = 1.8
+            viewer.cam.azimuth = 135.0
+            viewer.cam.elevation = -20.0
             while viewer.is_running():
                 loop_body()
                 viewer.sync()
