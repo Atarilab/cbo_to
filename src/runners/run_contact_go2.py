@@ -206,7 +206,7 @@ def main():
                 current_goal_idx += 1
             current_contact_plan = current_contact_plan[[1, 0]]
             command_start = now
-            if current_goal_idx >= HORIZON:
+            if current_goal_idx + OBS_HORIZON > HORIZON:
                 current_goal_idx = 0  # safe: feet targets are constant in trot-in-place
             time_left = COMMAND_DURATION
 
