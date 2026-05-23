@@ -19,12 +19,15 @@ import torch
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 MODEL_XML = REPO_ROOT / "models" / "go2" / "scene.xml"
 POLICY_FILE = str(REPO_ROOT / "models" / "go2" / "policies" / "contact_policy_stanceSeperate.pt")
-
 SIM_DT = 0.005
 DECIMATION = 4
+
+#############################
+# CONSTANTS
+#############################
+
 ACTION_SCALE = 0.35
-COMMAND_DURATION = 0.35
-HORIZON = 16
+HORIZON = 60
 OBS_HORIZON = 2
 
 MJ_TO_ISAAC = np.array([3, 0, 9, 6, 4, 1, 10, 7, 5, 2, 11, 8])
@@ -36,23 +39,13 @@ DEFAULT_Q_ISAAC = np.array(
 )
 DEFAULT_Q_MJ = DEFAULT_Q_ISAAC[ISAAC_TO_MJ]
 
-# Feet target offsets in base frame, ordered [FL, FR, RL, RR].
+# Feet X-Y offsets from the base, ordered [FL, FR, RL, RR].
 DEFAULT_OFFSET = np.array(
     [
         (0.1934, 0.1465, 0.0),
         (0.1934, -0.1465, 0.0),
         (-0.1934, 0.1465, 0.0),
         (-0.1934, -0.1465, 0.0),
-    ],
-    dtype=np.float32,
-)
-FEET_TARGET_Z = 0.0
-
-# Trot contact pattern, 2 phases x 4 feet in [FL, FR, RL, RR] order.
-TROT_PATTERN = np.array(
-    [
-        [False, True, True, False],
-        [True, False, False, True],
     ],
     dtype=np.float32,
 )
@@ -70,6 +63,65 @@ MJ_JOINT_NAMES = [
     "RL_hip_joint", "RL_thigh_joint", "RL_calf_joint",
 ]
 
+TROT = np.array(
+    [
+        [False, True, True, False],
+        [True, False, False, True],
+    ],
+    dtype=np.float32,
+)
+
+JUMP = np.array(
+    [
+        [True, True, True, True],
+        [False, False, False, False, ],
+    ],
+    dtype=np.float32,
+)
+
+BOUND = np.array(
+    [
+        [True, True, False, False],
+        [False, False, True, True],
+    ],
+    dtype=np.float32,
+)
+
+PACE = np.array(
+    [
+        [True, False, True, False],
+        [False, True, False, True],
+    ],
+    dtype=np.float32,
+)
+
+##############################
+# CONTACT CONFIGURATIONS
+##############################
+
+COMMAND_DURATION = 0.35
+
+# Per-horizon-step forward stride (meters).
+STRIDE_LENGTH = -0.1
+
+# Per-horizon-step lateral stride (meters).
+STRIDE_WIDTH = -0.1
+
+# Chosen gait
+GAIT = JUMP.copy()
+
+def build_future_feet_w(base_xy: np.ndarray) -> np.ndarray:
+    """Foot targets along the horizon. Currently, we set fixed stride length per feet."""
+    base = np.array([base_xy[0], base_xy[1], 0.0], dtype=np.float32)
+    per_foot = base + DEFAULT_OFFSET  # shape (4, 3)
+    horizon_offset = np.zeros((HORIZON, 3), dtype=np.float32)
+    horizon_offset[:, 0] = np.arange(HORIZON, dtype=np.float32) * STRIDE_LENGTH
+    horizon_offset[:, 1] = np.arange(HORIZON, dtype=np.float32) * STRIDE_WIDTH
+    return (per_foot[:, None, :] + horizon_offset[None, :, :]).astype(np.float32)
+
+#################################
+# HELPER FUNCTIONS
+#################################
 
 def quat_rotate_inverse(q_wxyz: np.ndarray, v: np.ndarray) -> np.ndarray:
     """Rotate vector(s) v by the inverse of quaternion q (w,x,y,z).
@@ -83,13 +135,6 @@ def quat_rotate_inverse(q_wxyz: np.ndarray, v: np.ndarray) -> np.ndarray:
     cross = np.cross(xyz, v)
     dot = np.einsum("...i,i->...", v, xyz)
     return (2.0 * w * w - 1.0) * v - 2.0 * w * cross + 2.0 * dot[..., None] * xyz
-
-
-def build_future_feet_w(base_xy: np.ndarray) -> np.ndarray:
-    """Constant-along-horizon foot targets at default offsets from `base_xy`, z=0.1."""
-    base = np.array([base_xy[0], base_xy[1], FEET_TARGET_Z], dtype=np.float32)
-    per_foot = base + DEFAULT_OFFSET  # shape (4, 3)
-    return np.broadcast_to(per_foot[:, None, :], (4, HORIZON, 3)).copy()
 
 
 def build_observation(
@@ -177,7 +222,7 @@ def main():
 
     base_xy0 = np.array(data.qpos[0:2], dtype=np.float32)
     future_feet_w = build_future_feet_w(base_xy0)
-    current_contact_plan = TROT_PATTERN.copy()
+    current_contact_plan = GAIT
     current_goal_idx = 0
     goal_completion_counter = 0
     command_start = time.time()
