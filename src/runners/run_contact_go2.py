@@ -18,7 +18,7 @@ import torch
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 MODEL_XML = REPO_ROOT / "models" / "go2" / "scene.xml"
-POLICY_PT_DEFAULT = str(REPO_ROOT / "models" / "go2" / "policies" / "contact_policy_stanceSeperate.pt")
+POLICY_FILE = str(REPO_ROOT / "models" / "go2" / "policies" / "contact_policy_stanceSeperate.pt")
 
 SIM_DT = 0.005
 DECIMATION = 4
@@ -147,7 +147,7 @@ def build_observation(
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--policy", default=POLICY_PT_DEFAULT, help="Path to TorchScript policy.")
+    parser.add_argument("--policy", default=POLICY_FILE, help="Path to TorchScript policy.")
     parser.add_argument("--no-viewer", action="store_true", help="Run headless without launching the viewer.")
     parser.add_argument("--duration", type=float, default=0.0, help="Stop after N seconds (0 = run forever).")
     args = parser.parse_args()
