@@ -23,7 +23,6 @@ POLICY_PT_DEFAULT = str(REPO_ROOT / "models" / "go2" / "policies" / "contact_pol
 SIM_DT = 0.005
 DECIMATION = 4
 ACTION_SCALE = 0.35
-KP, KD = 30.0, 0.5
 COMMAND_DURATION = 0.35
 HORIZON = 16
 OBS_HORIZON = 2
@@ -244,11 +243,8 @@ def main():
             q_target_isaac = raw_isaac * ACTION_SCALE + DEFAULT_Q_ISAAC
             joint_pos_targets_mj = q_target_isaac[ISAAC_TO_MJ]
 
-        qpos_mj = data.qpos[qpos_addr]
-        qvel_mj = data.qvel[qvel_addr]
-        tau = KP * (joint_pos_targets_mj - qpos_mj) - KD * qvel_mj
-        np.clip(tau, ctrlrange_lo, ctrlrange_hi, out=tau)
-        data.ctrl[:] = tau
+        np.clip(joint_pos_targets_mj, ctrlrange_lo, ctrlrange_hi, out=joint_pos_targets_mj)
+        data.ctrl[:] = joint_pos_targets_mj
 
         mujoco.mj_step(model, data)
         step_count += 1
